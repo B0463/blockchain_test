@@ -3,37 +3,29 @@ import sqlite3 from 'sqlite3';
 import Express from 'express';
 import bodyParser from 'body-parser';
 
-console.log("imported libs");
-
 const db = new sqlite3.Database(':memory:');
 const app = Express();
-
-console.log("db and app inicializes");
 
 function sha256(string: string): string {
     return CryptoJS.SHA256(string).toString(CryptoJS.enc.Hex);
 }
 
 db.serialize(() => {
-    console.log("creating table");
     db.run('CREATE TABLE blocks (id INTEGER PRIMARY KEY, nonce INTEGER, data TEXT, prevHash TEXT, hash TEXT)');
 });
 
 function addBlock(id, nonce, data, prevHash, hash) {
-    console.log("adding block id: "+id);
     db.serialize(() => {
         db.run('INSERT INTO blocks (id, nonce, data, prevHash, hash) VALUES (?, ?, ?, ?, ?)', [nonce, data, prevHash, hash], function(err) {
             if (err) {
                 console.error('Error writing data:', err.message);
-            } else {
-                console.log(`New block added with id: ${id}`);
             }
         });
     });
 }
 
 function makeGenesis() {
-    console.log("making genesis");
+    console.log("\x1b[1;37mmaking genesis: \x1b[0m");
     const id = 0;
     let nonce = 0;
     const data = "genesis";
@@ -51,11 +43,11 @@ function makeGenesis() {
 
     addBlock(id, nonce, data, prevHash, hash);
     const resp = 
-        `added block id: ${id}\n`+
-        `nonce: ${nonce}\n`+
-        `data: ${data}\n`+
-        `prevHash: ${prevHash}\n`+
-        `hash: ${hash}\n`;
+        `id: \x1b[1;36m${id}\x1b[0m\n`+
+        `nonce: \x1b[1;35m${nonce}\x1b[0m\n`+
+        `data: \x1b[1;37m${data}\x1b[0m\n`+
+        `prevHash: \x1b[0;32m${prevHash}\x1b[0m\n`+
+        `hash: \x1b[1;32m${hash}\x1b[0m\n`;
     console.log(resp);
     return hash;
 }
@@ -81,15 +73,15 @@ app.post("/addBlock", (req, res)=>{
     addBlock(id, nonce, data, prevHash, hash);
     lastHash = hash;
     const resp = 
-        `added block id: ${id}\n`+
-        `nonce: ${nonce}\n`+
-        `data: ${data}\n`+
-        `prevHash: ${prevHash}\n`+
-        `hash: ${hash}\n`;
+        `id: \x1b[1;36m${id}\x1b[0m\n`+
+        `nonce: \x1b[1;35m${nonce}\x1b[0m\n`+
+        `data: \x1b[1;37m${data}\x1b[0m\n`+
+        `prevHash: \x1b[0;32m${prevHash}\x1b[0m\n`+
+        `hash: \x1b[1;32m${hash}\x1b[0m\n`;
     console.log(resp);
     res.status(200).send(resp);
 });
 
 app.listen(3000, ()=>{
-    console.log("server ok port 3000");
+    console.log("\x1b[1;34m - server ok port 3000\n\x1b[0m");
 });
